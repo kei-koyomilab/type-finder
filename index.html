@@ -14,6 +14,17 @@
 <meta name="twitter:title" content="生年月日タイプ診断｜Kei 暦ラボ">
 <meta name="twitter:description" content="生年月日を選ぶだけ。あなたの本質がわかる無料診断。">
 <meta name="twitter:image" content="https://kei-koyomilab.github.io/type-finder/ogp.png">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RZSX8MK0JV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RZSX8MK0JV');
+  function track(name, typeName) {
+    try { gtag('event', name, { 'type_name': typeName || 'unknown' }); } catch (e) {}
+  }
+</script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -295,7 +306,7 @@ footer {
     <div class="cta-section">
       <a class="cta-btn" id="r-cta" href="#" target="_blank">このタイプの取扱説明書を見る</a>
       <span class="cta-sub">詳細PDF（1,480円）｜note にて販売中</span>
-      <a class="cta-consult" href="https://coconala.com/services/4294578" target="_blank">
+      <a class="cta-consult" id="r-consult" href="https://coconala.com/services/4294578" target="_blank">
         さらに個別の命式を読む → 鑑定はこちら
       </a>
     </div>
@@ -407,6 +418,7 @@ function getDayKanIndex(y, m, d) {
   return ((jdn + 49) % 60 + 60) % 60 % 10;
 }
 // ---- 判定・表示 ----
+let lastType = '';
 function calculate() {
   const y = parseInt(document.getElementById('sel-year').value);
   const m = parseInt(document.getElementById('sel-month').value);
@@ -419,6 +431,8 @@ function calculate() {
   }
   const idx = getDayKanIndex(y, m, d);
   const data = KAN_DATA[idx];
+  lastType = data.kan + '_' + data.type;
+  track('shindan', lastType);
   document.getElementById('r-kan').textContent = data.kan;
   document.getElementById('r-reading').textContent = data.reading;
   document.getElementById('r-type').textContent = data.type;
@@ -441,6 +455,13 @@ function calculate() {
   el.style.animation = 'fadeUp 0.55s ease';
   setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
 }
+// ---- クリック計測 ----
+document.getElementById('r-cta').addEventListener('click', function() {
+  track('note_click', lastType);
+});
+document.getElementById('r-consult').addEventListener('click', function() {
+  track('kantei_click', lastType);
+});
 </script>
 </body>
 </html>
