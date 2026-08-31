@@ -401,6 +401,23 @@ footer {
   .result-kan { font-size: 52px; }
 }
 </style>
+<!-- ▼ Google Analytics 4 ▼ -->
+<script>
+  /* ===== 計測ID。ここ1行だけ書き換える（GA管理 > データストリーム > ウェブ） ===== */
+  var GA_ID = 'G-RZSX8MK0JV';
+  /* ============================================================ */
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  if (GA_ID && GA_ID !== 'G-XXXXXXXXXX') {
+    var _ga = document.createElement('script');
+    _ga.async = true;
+    _ga.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(_ga);
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+  }
+</script>
+<!-- ▲ Google Analytics 4 ▲ -->
 </head>
 <body>
 
@@ -446,7 +463,7 @@ footer {
     <div class="cta-section">
       <div class="cta-line-wrap" style="margin-top:4px;padding-top:0;border-top:none;">
         <div class="cta-or">タイプがわかったら、次はここから</div>
-        <a class="cta-line" href="https://lin.ee/OJ75eFR" target="_blank" rel="noopener">
+        <a class="cta-line" data-cta="line" href="https://lin.ee/OJ75eFR" target="_blank" rel="noopener">
           公式LINEで相談する
         </a>
         <span class="cta-sub">無料｜生年月日と、気になっていることを送るだけ</span>
@@ -455,18 +472,18 @@ footer {
       <div class="cta-paid-wrap">
         <div class="cta-paid-label">もっと具体的に視てほしい方へ</div>
 
-        <a class="cta-paid-main" href="https://coconala.com/services/4356584" target="_blank" rel="noopener">
+        <a class="cta-paid-main" data-cta="coconala_500" href="https://coconala.com/services/4356584" target="_blank" rel="noopener">
           <span class="cta-paid-title">今動くべき？ 迷いの答えを時期で視ます</span>
           <span class="cta-paid-price">500円｜動くか、待つか。根拠のある形で</span>
         </a>
 
         <div class="cta-minor">
-          <a id="r-cta" href="#" target="_blank">このタイプの取扱説明書を読む（1,480円・note）</a>
-          <a href="https://coconala.com/services/4368882" target="_blank" rel="noopener">気になるあの人との関わり方を視る（3,000円）</a>
+          <a id="r-cta" data-cta="note_1480" href="#" target="_blank">このタイプの取扱説明書を読む（1,480円・note）</a>
+          <a data-cta="coconala_3000" href="https://coconala.com/services/4368882" target="_blank" rel="noopener">気になるあの人との関わり方を視る（3,000円）</a>
         </div>
       </div>
 
-      <a class="cta-menu" href="https://lit.link/kei_koyomilab" target="_blank" rel="noopener">その他のメニューを見る →</a>
+      <a class="cta-menu" data-cta="litlink" href="https://lit.link/kei_koyomilab" target="_blank" rel="noopener">その他のメニューを見る →</a>
     </div>
   </div>
 </main>
@@ -624,7 +641,17 @@ function calculate() {
   el.offsetHeight;
   el.style.animation = 'fadeUp 0.55s ease';
   setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+
+  // 結果画面まで到達したことを記録
+  gtag('event', 'diagnose_complete', { kan: data.kan, type: data.type });
 }
+
+// ---- CTAクリックの記録 ----
+document.addEventListener('click', function (e) {
+  var a = e.target.closest && e.target.closest('a[data-cta]');
+  if (!a) return;
+  gtag('event', 'cta_click', { cta: a.getAttribute('data-cta') });
+});
 </script>
 
 </body>
