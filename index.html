@@ -131,6 +131,56 @@ main {
   background: #1A1A2E;
 }
 
+.known-wrap {
+  margin-top: 24px;
+  border-top: 1px solid rgba(201,168,76,0.15);
+  padding-top: 18px;
+}
+.known-toggle {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(245,245,240,0.42);
+  transition: color 0.2s;
+}
+.known-toggle::-webkit-details-marker { display: none; }
+.known-toggle::after { content: " \25BE"; }
+.known-wrap[open] .known-toggle::after { content: " \25B4"; }
+.known-toggle:hover { color: #C9A84C; }
+.known-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+.known-grid button {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 6px;
+  color: rgba(245,245,240,0.75);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 11px 2px 9px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.known-grid button:hover {
+  border-color: rgba(201,168,76,0.7);
+  background: rgba(201,168,76,0.08);
+}
+.known-grid button:focus-visible {
+  outline: 2px solid rgba(201,168,76,0.8);
+  outline-offset: 2px;
+}
+.known-grid .k { font-size: 16px; color: #C9A84C; }
+
 .calc-btn {
   width: 100%;
   background: #C9A84C;
@@ -450,6 +500,11 @@ footer {
       </div>
     </div>
     <button class="calc-btn" onclick="calculate()">判 定 す る</button>
+
+    <details class="known-wrap">
+      <summary class="known-toggle">タイプがもう分かっている方はこちら</summary>
+      <div class="known-grid" id="known-grid"></div>
+    </details>
   </div>
 
   <div class="result-container" id="result">
@@ -520,9 +575,9 @@ footer {
 // ---- 日干データ ----
 const KAN_DATA = [
   {
-    kan:'甲', reading:'こう・きのえ', type:'巨木タイプ',
+    kan:'甲', reading:'こう・きのえ', type:'大樹タイプ',
     keywords:['成長','志','まっすぐ','開拓'],
-    desc:'大地に根を張る巨木のような存在。高い志と向上心を持ち、一つのことを深く追求します。リーダー気質がありますが、曲げられることを極端に嫌う一面も。自分なりの「道」を歩むことで最も輝きます。',
+    desc:'大地に根を張る大樹のような存在。高い志と向上心を持ち、一つのことを深く追求します。リーダー気質がありますが、曲げられることを極端に嫌う一面も。自分なりの「道」を歩むことで最も輝きます。',
     url:'https://note.com/kei_koyomilab/n/nc194cf0b9361' // 甲タイプ記事
   },
   {
@@ -614,7 +669,11 @@ function calculate() {
     return;
   }
 
-  const idx  = getDayKanIndex(y, m, d);
+  showType(getDayKanIndex(y, m, d), 'diagnose_complete');
+}
+
+// ---- 結果表示（生年月日からでも、タイプ直接指定からでも呼ばれる） ----
+function showType(idx, evName) {
   const data = KAN_DATA[idx];
 
   document.getElementById('r-kan').textContent     = data.kan;
@@ -643,8 +702,25 @@ function calculate() {
   setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
 
   // 結果画面まで到達したことを記録
-  gtag('event', 'diagnose_complete', { kan: data.kan, type: data.type });
+  //   diagnose_complete = 生年月日から診断した人
+  //   type_select       = すでにタイプを知っていて直接選んだ人（リピーター）
+  gtag('event', evName, { kan: data.kan, type: data.type });
 }
+
+// ---- タイプ直接選択（すでに自分のタイプを知っている人向け） ----
+(function () {
+  var grid = document.getElementById('known-grid');
+  if (!grid) return;
+  KAN_DATA.forEach(function (d, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '<span class="k">' + d.kan + '</span>'
+                + '<span>' + d.type.replace('タイプ', '') + '</span>';
+    b.setAttribute('aria-label', d.kan + '（' + d.type + '）の結果を見る');
+    b.addEventListener('click', function () { showType(i, 'type_select'); });
+    grid.appendChild(b);
+  });
+})();
 
 // ---- CTAクリックの記録 ----
 document.addEventListener('click', function (e) {
